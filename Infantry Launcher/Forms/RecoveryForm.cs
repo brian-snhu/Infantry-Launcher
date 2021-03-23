@@ -34,9 +34,42 @@ namespace Infantry_Launcher
 
         private void OKButton_Click(object sender, EventArgs e)
         {
-            //TODO: Add the account controller functionality here
+            string email = string.Empty;
+            string username = string.Empty;
+            if (textBox == null)
+            {
+                MessageBox.Show("You must pick a recovery method first.\r\nHit cancel to return to the launcher.", "Recovery Error");
+                return;
+            }
 
-            Close();
+            if (!Password && string.IsNullOrEmpty(textBox.Text))
+            {
+                MessageBox.Show("Email cannot be blank.", "Recovery Error", MessageBoxButtons.OK);
+                return;
+            }
+            else
+            {
+                if (string.IsNullOrEmpty(textBox.Text))
+                {
+                    MessageBox.Show("Username cannot be blank.", "Recovery Error", MessageBoxButtons.OK);
+                    return;
+                }
+            }
+
+            if (!Password)
+			{	email = textBox.Text.Trim(); }
+			else
+			{	username = textBox.Text.Trim(); }
+
+			Cursor.Current = Cursors.WaitCursor;
+            if (!AccountController.RecoveryRequest(username, email, Password))
+            {
+                Cursor.Current = Cursors.Default;
+                return;
+            }
+
+            Cursor.Current = Cursors.Default;
+			Close();
         }
 
         private void CancelButton_Click(object sender, EventArgs e)

@@ -88,10 +88,42 @@ namespace Infantry_Launcher.Controllers
         /// </summary>
         public static bool RecoveryRequest(string Username, string Email, bool Reset)
         {
-            //TODO: provide the functionality algorithm and send it to the account server
-            //Use a switch association with the AccountServer and return a case IStatus response
+            string url = CurrentUrl + @"/recover";
+            string payload;
+            IStatus.RecoverRequestObject request = new IStatus.RecoverRequestObject();
+            request.Username = Username;
+            request.Email = Email;
+            request.Reset = Reset;
 
-            return false;
+            string msg;
+            switch (AccountServer.RecoverAccount(request, url, out payload))
+            {
+                case IStatus.RecoverStatusCode.Ok:
+                    MessageBox.Show("Recovery Successful!\n\rCheck your email at " + payload, "Recovery Request");
+                    return true;
+
+                case IStatus.RecoverStatusCode.InvalidCredentials:
+                    msg = "Error: Invalid username/email";
+                    MessageBox.Show(string.IsNullOrWhiteSpace(AccountServer.Reason) ? msg : "Error: " + AccountServer.Reason, "Recovery Request");
+                    break;
+
+                case IStatus.RecoverStatusCode.MalformedData:
+                    msg = "Error: malformed username/email";
+                    MessageBox.Show(string.IsNullOrWhiteSpace(AccountServer.Reason) ? msg : "Error: " + AccountServer.Reason, "Recovery Request");
+                    break;
+
+                case IStatus.RecoverStatusCode.ServerError:
+                    msg = "Server error, could not connect.\r\n Is your firewall enabled?";
+                    MessageBox.Show(string.IsNullOrWhiteSpace(AccountServer.Reason) ? msg : "Error: " + AccountServer.Reason, "Recovery Request");
+                    break;
+
+                case IStatus.RecoverStatusCode.NoResponse:
+                    msg = "Server error, received no response from the server.";
+                    MessageBox.Show(string.IsNullOrWhiteSpace(AccountServer.Reason) ? msg : "Error: " + AccountServer.Reason, "Recovery Request");
+                    break;
+            }
+
+			return false;
         }
 
         /// <summary>
