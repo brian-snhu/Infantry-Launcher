@@ -175,10 +175,51 @@ namespace Infantry_Launcher.Protocol
         /// </summary>
         public static IStatus.RecoverStatusCode RecoverAccount(IStatus.RecoverRequestObject requestModel, string RequestUrl, out string payload)
         {
-            //TODO: send data using JSON
-
             payload = null;
-            return IStatus.RecoverStatusCode.ServerError;
+            if (requestModel == null)
+            { throw new ArgumentNullException("requestModel"); }
+
+            byte[] bytes = Encoding.UTF8.GetBytes(JsonConvert.SerializeObject(requestModel));
+            HttpWebRequest httpWebRequest = (HttpWebRequest)WebRequest.Create(RequestUrl);
+            httpWebRequest.Method = "POST";
+            httpWebRequest.ContentType = "application/json";
+            httpWebRequest.ContentLength = bytes.Length;
+            try
+            {
+                httpWebRequest.GetRequestStream().Write(bytes, 0, bytes.Length);
+            }
+            catch (WebException)
+            { return IStatus.RecoverStatusCode.ServerError; }
+
+            try
+            {
+                using (StreamReader streamReader = new StreamReader(httpWebRequest.GetResponse().GetResponseStream()))
+                {
+                    payload = streamReader.ReadToEnd();
+                    return IStatus.RecoverStatusCode.Ok;
+                }
+            }
+            catch (WebException ex)
+            {
+                if ((HttpWebResponse)ex.Response == null)
+                { return IStatus.RecoverStatusCode.NoResponse; }
+
+                switch (((HttpWebResponse)ex.Response).StatusCode)
+                {
+                    case HttpStatusCode.BadRequest:
+                        Reason = ((HttpWebResponse)ex.Response).StatusDescription;
+                        return IStatus.RecoverStatusCode.MalformedData;
+                    case HttpStatusCode.NotFound:
+                        Reason = ((HttpWebResponse)ex.Response).StatusDescription;
+                        return IStatus.RecoverStatusCode.InvalidCredentials;
+                    case HttpStatusCode.InternalServerError:
+                        Reason = ((HttpWebResponse)ex.Response).StatusDescription;
+                        return IStatus.RecoverStatusCode.ServerError;
+
+                    default:
+                        return IStatus.RecoverStatusCode.ServerError;
+                }
+            }
         }
 
     }

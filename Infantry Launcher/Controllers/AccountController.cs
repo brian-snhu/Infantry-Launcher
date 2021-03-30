@@ -113,7 +113,7 @@ namespace Infantry_Launcher.Controllers
                     break;
 
                 case IStatus.RecoverStatusCode.ServerError:
-                    msg = "Server error, could not connect.\r\n Is your firewall enabled?";
+                    msg = "Server error, could not connect.\r\nIs your firewall enabled?";
                     MessageBox.Show(string.IsNullOrWhiteSpace(AccountServer.Reason) ? msg : "Error: " + AccountServer.Reason, "Recovery Request");
                     break;
 

@@ -52,7 +52,7 @@ namespace Infantry_Launcher
                 if (string.IsNullOrEmpty(textBox.Text))
                 {
                     MessageBox.Show("Username cannot be blank.", "Recovery Error", MessageBoxButtons.OK);
-                    return;
+					return;
                 }
             }
 
